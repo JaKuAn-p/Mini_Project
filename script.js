@@ -1,6 +1,7 @@
-let currentScore = 0;
+let currentScore = Number(localStorage.getItem('studyFlowScore')) || 0;
 let currentDate = new Date();
-let scheduleEvents = {}; // เก็บแผนการติวตามวันที่
+let scheduleEvents = {};
+let selectedDateKey = null;
 
 const monthNames = [
     "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
@@ -20,7 +21,11 @@ function generateSchedule() {
         return;
     }
 
-    scheduleEvents = {}; // ล้างข้อมูลเก่า
+    if (sleep + work > 24 || days < 1) {
+        alert("กรุณาตรวจสอบจำนวนชั่วโมงและจำนวนวันอีกครั้ง");
+        return;
+    }
+    scheduleEvents = {};
     const today = new Date();
 
     // สร้างแผนการเรียนเริ่มตั้งแต่วันนี้ ไปจนครบจำนวนวันที่ตั้งเป้าไว้
@@ -28,17 +33,22 @@ function generateSchedule() {
         let eventDate = new Date(today);
         eventDate.setDate(today.getDate() + i);
         
-        let dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}-${eventDate.getDate()}`;
+        const dateKey = getDateKey(eventDate);
         scheduleEvents[dateKey] = {
             subject: subject,
-            hours: (20 / days).toFixed(1), // สมมุติต้องเรียน 20 ชม.
-            timeSlot: "18:00 - 19:30 น."
+            hours: Math.min(2, Math.max(1, freeTime / 5)).toFixed(1),
+            timeSlot: i % 2 === 0 ? "18:00 - 19:30 น." : "19:45 - 21:15 น.",
+            completed: false
         };
     }
 
-    alert(`คำนวณสำเร็จ! สร้างแผนติว ${subject} ลงปฏิทิน ${days} วันเรียบร้อย`);
+    currentDate = new Date(today);
     renderCalendar();
+    alert(`สร้างแผน ${subject} จำนวน ${days} วันเรียบร้อย`);
 }
+
+function getDateKey(date) { return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`; }
+function isToday(date) { return getDateKey(date) === getDateKey(new Date()); }
 
 function renderCalendar() {
     const year = currentDate.getFullYear();
@@ -66,20 +76,22 @@ function renderCalendar() {
 
     // สร้างช่องวันที่
     for (let day = 1; day <= totalDays; day++) {
-        let dateKey = `${year}-${month}-${day}`;
-        let event = scheduleEvents[dateKey];
+        const dateKey = getDateKey(new Date(year, month, day));
+        const event = scheduleEvents[dateKey];
 
-        let hasEventClass = event ? 'has-event' : '';
-        let badgeHtml = event ? `<span class="badge">${event.subject}</span>` : '';
-        let onClickAttr = event ? `onclick="openDetail('${day} ${monthNames[month]} ${year}', '${event.subject}', '${event.hours}', '${event.timeSlot}')"` : '';
+        const hasEventClass = event ? 'has-event' : '';
+        const todayClass = isToday(new Date(year, month, day)) ? 'today' : '';
+        const badgeHtml = event ? `<span class="badge">${event.subject}</span><span class="more-badge">${event.timeSlot}</span>` : '';
 
         grid.innerHTML += `
-            <div class="day-box ${hasEventClass}" ${onClickAttr}>
-                <b>${day}</b>
+            <div class="day-box ${hasEventClass} ${todayClass}" data-date="${dateKey}">
+                <b class="date-number">${day}</b>
                 ${badgeHtml}
             </div>
         `;
     }
+    grid.querySelectorAll('.day-box.has-event').forEach(box => box.addEventListener('click', () => openDetail(box.dataset.date)));
+    updateSummary();
 }
 
 function changeMonth(offset) {
@@ -87,12 +99,18 @@ function changeMonth(offset) {
     renderCalendar();
 }
 
-function openDetail(dateText, subject, hours, timeSlot) {
-    document.getElementById('modalDate').innerText = '📅 ' + dateText;
+function openDetail(dateKey) {
+    const event = scheduleEvents[dateKey];
+    if (!event) return;
+    selectedDateKey = dateKey;
+    const [year, month, day] = dateKey.split('-').map(Number);
+    document.getElementById('modalDate').innerText = `วันที่ ${day} ${monthNames[month]} ${year}`;
     document.getElementById('modalTimeSlots').innerHTML = `
-        <p>🎯 วิชา: <b>${subject}</b></p>
-        <p>⏱️ ช่วงเวลาติว: <b>${timeSlot}</b> (${hours} ชม.)</p>
+        <p>วิชา: <b>${event.subject}</b></p>
+        <p>ช่วงเวลา: <b>${event.timeSlot}</b></p>
+        <p>ระยะเวลา: <b>${event.hours} ชั่วโมง</b></p>
     `;
+    document.getElementById('checkinBtn').innerText = event.completed ? 'ทำเสร็จแล้ว' : '✓ ทำเสร็จแล้ว (+50 แต้ม)';
     document.getElementById('detailModal').style.display = 'flex';
 }
 
@@ -101,11 +119,53 @@ function closeDetail() {
 }
 
 function addScore(points) {
+    if (!selectedDateKey || scheduleEvents[selectedDateKey].completed) return closeDetail();
+    scheduleEvents[selectedDateKey].completed = true;
     currentScore += points;
+    localStorage.setItem('studyFlowScore', currentScore);
     document.getElementById('score').innerText = currentScore;
     alert(`เช็กอินเรียบร้อย! ได้รับ ${points} แต้ม`);
     closeDetail();
+    renderCalendar();
 }
 
-// แสดงปฏิทินเดือนปัจจุบันทันทีเมื่อเปิดหน้าเว็บ
+function updateSummary() {
+    const events = Object.values(scheduleEvents);
+    const todayEvent = scheduleEvents[getDateKey(new Date())];
+    document.getElementById('score').innerHTML = `${currentScore} <small>แต้ม</small>`;
+    document.getElementById('focusHours').innerText = `${todayEvent ? todayEvent.hours : 0} ชม.`;
+    document.getElementById('completedCount').innerText = `${events.filter(event => event.completed).length} งาน`;
+    const upcoming = events.filter((event, index) => !event.completed).slice(0, 3);
+    document.getElementById('upNextCount').innerText = events.length;
+    document.getElementById('upNextList').innerHTML = upcoming.length ? upcoming.map(event => {
+        const key = Object.keys(scheduleEvents).find(item => scheduleEvents[item] === event);
+        const [, month, day] = key.split('-').map(Number);
+        return `<div class="next-item"><div class="next-date">${day}<small>${monthNames[month].slice(0, 3)}</small></div><div><strong>${event.subject}</strong><span>${event.timeSlot} · ${event.hours} ชม.</span></div></div>`;
+    }).join('') : '<p class="empty-state">ยังไม่มีตารางที่กำลังจะถึง</p>';
+}
+
+function createStarterSchedule() {
+    const subjects = ['คณิตศาสตร์', 'ภาษาอังกฤษ', 'ฟิสิกส์', 'ทบทวนบทเรียน'];
+    const timeSlots = ['18:00 - 19:30 น.', '19:45 - 21:15 น.'];
+    for (let index = 0; index < 7; index += 1) {
+        const date = new Date();
+        date.setDate(date.getDate() + index);
+        scheduleEvents[getDateKey(date)] = {
+            subject: subjects[index % subjects.length],
+            hours: '1.5',
+            timeSlot: timeSlots[index % timeSlots.length],
+            completed: false
+        };
+    }
+}
+
+document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+document.getElementById('todayBtn').addEventListener('click', () => { currentDate = new Date(); renderCalendar(); });
+document.getElementById('generateBtn').addEventListener('click', generateSchedule);
+document.getElementById('closeModal').addEventListener('click', closeDetail);
+document.getElementById('checkinBtn').addEventListener('click', () => addScore(50));
+document.getElementById('detailModal').addEventListener('click', event => { if (event.target.id === 'detailModal') closeDetail(); });
+document.getElementById('todayLabel').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+createStarterSchedule();
 renderCalendar();

@@ -2,62 +2,58 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Schedule & Tamagotchi Sync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>⏰ ระบบจัดตารางเวลาติว + ปฏิทินตลอดปี</h1>
-        
-        <!-- ส่วนที่ 1: กรอกข้อมูล -->
-        <div class="card">
-            <h2>1. กรอกข้อมูลประจำวัน & เป้าหมาย</h2>
-            <label>เวลานอน (ชม./วัน):</label>
-            <input type="number" id="sleepTime" value="8">
-            
-            <label>เวลาเรียน/ทำงาน (ชม./วัน):</label>
-            <input type="number" id="workTime" value="8">
-            
-            <label>วิชาที่สนใจ:</label>
-            <select id="subject">
-                <option value="คณิตศาสตร์">คณิตศาสตร์</option>
-                <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
-                <option value="ฟิสิกส์">ฟิสิกส์</option>
-            </select>
-            
-            <label>เป้าหมายต้องจบใน (วัน):</label>
-            <input type="number" id="targetDays" value="30">
-            
-            <button onclick="generateSchedule()">คำนวณและสร้างปฏิทิน</button>
-        </div>
+    <main class="app-shell">
+        <header class="topbar">
+            <div class="brand"><span class="brand-mark">◒</span><div><p class="eyebrow">PERSONAL PLANNER</p><h1>StudyFlow</h1></div></div>
+            <div class="today-label"><span class="status-dot"></span> แผนของฉัน <b id="todayLabel"></b></div>
+        </header>
 
-        <!-- ส่วนที่ 2: แสดงปฏิทินแบบเปลี่ยนเดือนได้ -->
-        <div class="card">
+        <section class="intro"><div><p class="eyebrow">WEEKLY RHYTHM</p><h2>วางแผนวันของคุณ<br><em>ให้มีจังหวะที่พอดี</em></h2></div><p class="intro-copy">จัดสรรเวลาเรียน งาน และการพักให้สมดุล แล้วเปลี่ยนทุกเป้าหมายให้เป็นก้าวเล็ก ๆ ที่ทำได้จริง</p></section>
+
+        <section class="stats-row" aria-label="สรุปตารางเวลา">
+            <div class="stat-card accent"><span class="stat-icon">◷</span><div><span>เวลาโฟกัสวันนี้</span><strong id="focusHours">0 ชม.</strong></div></div>
+            <div class="stat-card"><span class="stat-icon orange">✓</span><div><span>ทำสำเร็จแล้ว</span><strong id="completedCount">0 งาน</strong></div></div>
+            <div class="stat-card"><span class="stat-icon blue">★</span><div><span>คะแนนสะสม</span><strong id="score">0 <small>แต้ม</small></strong></div></div>
+        </section>
+
+        <div class="workspace">
+            <section class="calendar-panel">
+                <div class="section-heading"><div><p class="eyebrow">YOUR CALENDAR</p><h2 id="currentMonthYear">ปฏิทิน</h2></div><div class="calendar-actions"><button class="icon-btn" id="prevMonth" aria-label="เดือนก่อนหน้า">←</button><button class="today-btn" id="todayBtn">วันนี้</button><button class="icon-btn" id="nextMonth" aria-label="เดือนถัดไป">→</button></div></div>
             <div class="calendar-header">
-                <button onclick="changeMonth(-1)">❮ เดือนก่อนหน้า</button>
-                <h2 id="currentMonthYear">มกราคม 2026</h2>
-                <button onclick="changeMonth(1)">เดือนถัดไป ❯</button>
+                <span>ตารางเรียนและกิจกรรม</span><span class="legend"><i></i> มีตาราง</span>
             </div>
-            
             <div class="calendar-grid" id="calendarGrid">
-                <!-- วันในปฏิทินจะถูกสร้างจาก JavaScript -->
             </div>
-        </div>
+            </section>
 
-        <!-- ส่วนที่ 3: สถานะ Tamagotchi -->
-        <div class="card score-board">
-            <h2>3. สถานะ Tamagotchi</h2>
-            <p>คะแนนสะสม: <span id="score">0</span> แต้ม</p>
+            <aside class="side-panel">
+                <div class="form-panel"><p class="eyebrow">BUILD A PLAN</p><h2>สร้างตารางใหม่</h2><p class="muted">บอกเวลาที่คุณมี แล้วเราจะจัดช่วงโฟกัสให้</p>
+                    <label for="sleepTime">เวลานอน <span>ชม. / วัน</span></label><input type="number" id="sleepTime" value="8" min="0" max="24">
+                    <label for="workTime">เวลาเรียน / ทำงาน <span>ชม. / วัน</span></label><input type="number" id="workTime" value="8" min="0" max="24">
+                    <label for="subject">วิชาที่สนใจ</label><select id="subject"><option value="คณิตศาสตร์">คณิตศาสตร์</option><option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option><option value="ฟิสิกส์">ฟิสิกส์</option><option value="วิทยาศาสตร์">วิทยาศาสตร์</option></select>
+                    <label for="targetDays">เป้าหมายใน <span>วัน</span></label><input type="number" id="targetDays" value="30" min="1" max="365">
+                    <button class="primary-btn" id="generateBtn">คำนวณและสร้างแผน <span>↗</span></button>
+                </div>
+                <div class="up-next"><div class="section-heading"><div><p class="eyebrow">UP NEXT</p><h2>กำลังจะถึง</h2></div><span class="count-pill" id="upNextCount">0</span></div><div id="upNextList" class="up-next-list"></div></div>
+            </aside>
         </div>
-    </div>
+    </main>
 
     <!-- หน้าต่าง Pop-up แสดงรายละเอียดเมื่อกดเลือกวัน -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeDetail()">&times;</span>
+            <button class="close-btn" id="closeModal" aria-label="ปิดรายละเอียด">&times;</button>
             <h3 id="modalDate">รายละเอียดวันที่</h3>
             <div id="modalTimeSlots" class="time-slot-box"></div>
-            <button class="checkin-btn" onclick="addScore(50)">✅ เรียนเสร็จแล้ว (+50 แต้ม)</button>
+            <button class="checkin-btn" id="checkinBtn">✓ ทำเสร็จแล้ว (+50 แต้ม)</button>
         </div>
     </div>
 
