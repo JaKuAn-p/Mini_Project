@@ -1,48 +1,120 @@
-/* ปฏิทิน Grid */
+body {
+    font-family: 'Tahoma', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    color: #333;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Calendar Header & Grid */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calendar-header button {
+    width: auto;
+    padding: 6px 12px;
+    margin: 0;
+    background-color: #2196F3;
+}
+
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 5px;
     text-align: center;
 }
 
 .day-header {
     font-weight: bold;
-    color: #666;
+    padding: 8px 0;
+    background: #eee;
+    border-radius: 4px;
 }
 
-.day {
-    padding: 12px 5px;
-    background: #f8f9fa;
-    border-radius: 8px;
+.day-box {
+    padding: 10px 2px;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    min-height: 45px;
     cursor: pointer;
-    border: 1px solid #eee;
+    position: relative;
 }
 
-.day.active {
+.day-box.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.day-box.has-event {
     background: #e8f5e9;
     border-color: #81c784;
 }
 
 .badge {
     display: block;
-    font-size: 10px;
+    font-size: 9px;
     background: #4caf50;
     color: white;
-    border-radius: 4px;
+    border-radius: 3px;
     margin-top: 4px;
+    padding: 2px 0;
 }
 
-.badge.eng {
-    background: #ff9800;
-}
-
-/* Modal Pop-up */
+/* Modal Styling */
 .modal {
     display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
 }
@@ -50,7 +122,7 @@
 .modal-content {
     background: white;
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 10px;
     width: 80%;
     max-width: 400px;
     position: relative;
@@ -68,5 +140,15 @@
     padding: 15px;
     border-radius: 8px;
     margin: 15px 0;
+}
+
+.score-board {
+    background-color: #e8f5e9;
+    text-align: center;
+}
+
+#score {
+    font-size: 24px;
     font-weight: bold;
+    color: #2e7d32;
 }
