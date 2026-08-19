@@ -1,61 +1,18 @@
-body {
-    font-family: 'Tahoma', sans-serif;
-    background-color: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+let currentScore = 0;
+
+function openDetail(dateText, detailText) {
+    document.getElementById('modalDate').innerText = '📅 ' + dateText;
+    document.getElementById('modalTimeSlots').innerHTML = '⏱️ ' + detailText;
+    document.getElementById('detailModal').style.display = 'flex';
 }
 
-.container {
-    width: 100%;
-    max-width: 500px;
+function closeDetail() {
+    document.getElementById('detailModal').style.display = 'none';
 }
 
-.card {
-    background: white;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-h1, h2 {
-    color: #333;
-}
-
-label {
-    display: block;
-    margin-top: 10px;
-}
-
-input, select, button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #4CAF50;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-.score-board {
-    background-color: #e8f5e9;
-    text-align: center;
-}
-
-#score {
-    font-size: 24px;
-    font-weight: bold;
-    color: #2e7d32;
+function addScore(points) {
+    currentScore += points;
+    document.getElementById('score').innerText = currentScore;
+    alert(`เช็กอินสำเร็จ! ได้รับ ${points} แต้ม`);
+    closeDetail();
 }

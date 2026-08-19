@@ -2,46 +2,52 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Schedule & Tamagotchi Sync</title>
+    <title>Smart Calendar & Tamagotchi Sync</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>⏰ ระบบจัดตารางเวลาติว + สะสมแต้ม</h1>
+        <h1>📅 ตารางเวลาติว (Calendar View)</h1>
         
-        <!-- ส่วนที่ 1: กรอกข้อมูล -->
-        <div class="card">
-            <h2>1. กรอกข้อมูลประจำวัน & เป้าหมาย</h2>
-            <label>เวลานอน (ชม./วัน):</label>
-            <input type="number" id="sleepTime" value="8">
-            
-            <label>เวลาเรียน/ทำงาน (ชม./วัน):</label>
-            <input type="number" id="workTime" value="8">
-            
-            <label>วิชาที่สนใจ:</label>
-            <select id="subject">
-                <option value="คณิตศาสตร์">คณิตศาสตร์</option>
-                <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
-                <option value="ฟิสิกส์">ฟิสิกส์</option>
-            </select>
-            
-            <label>เป้าหมายต้องจบใน (วัน):</label>
-            <input type="number" id="targetDays" value="10">
-            
-            <button onclick="generateSchedule()">คำนวณตารางเวลา</button>
+        <!-- ส่วนปฏิทินจำลอง -->
+        <div class="calendar-card">
+            <h2>สิงหาคม 2026</h2>
+            <div class="calendar-grid">
+                <div class="day-header">อา</div>
+                <div class="day-header">จ</div>
+                <div class="day-header">อ</div>
+                <div class="day-header">พ</div>
+                <div class="day-header">พฤ</div>
+                <div class="day-header">ศ</div>
+                <div class="day-header">ส</div>
+                
+                <!-- วันที่จำลอง -->
+                <div class="day">17</div>
+                <div class="day">18</div>
+                <div class="day active" onclick="openDetail('19 สิงหาคม', '18:00 - 19:00 น. : ติวคณิตศาสตร์')">
+                    19 <span class="badge">คณิต</span>
+                </div>
+                <div class="day active" onclick="openDetail('20 สิงหาคม', '19:00 - 20:00 น. : ติวภาษาอังกฤษ')">
+                    20 <span class="badge eng">อังกฤษ</span>
+                </div>
+                <div class="day">21</div>
+                <div class="day">22</div>
+                <div class="day">23</div>
+            </div>
         </div>
 
-        <!-- ส่วนที่ 2: แสดงตารางเวลา -->
-        <div class="card">
-            <h2>2. ตารางเวลาของคุณ</h2>
-            <div id="scheduleResult">กรอกข้อมูลแล้วกดคำนวณ...</div>
+        <!-- หน้าต่างป๊อปอัป (Modal) แสดงรายละเอียดเวลา -->
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeDetail()">&times;</span>
+                <h3 id="modalDate">รายละเอียดวันที่</h3>
+                <div id="modalTimeSlots" class="time-slot-box"></div>
+                <button class="checkin-btn" onclick="addScore(50)">✅ เช็กอินติวเสร็จ (+50 แต้ม)</button>
+            </div>
         </div>
 
-        <!-- ส่วนที่ 3: จำลองการเก็บแต้ม -->
-        <div class="card score-board">
-            <h2>3. สถานะ Tamagotchi</h2>
-            <p>คะแนนสะสม: <span id="score">0</span> แต้ม</p>
-            <button onclick="addScore(50)">✅ เรียนเสร็จแล้ว (+50 แต้ม)</button>
+        <div class="score-board">
+            <p>คะแนน Tamagotchi: <span id="score">0</span> แต้ม</p>
         </div>
     </div>
 
