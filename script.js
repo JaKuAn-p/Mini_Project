@@ -8,25 +8,37 @@ const monthNames = [
     "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
 ];
 
-function generateSchedule() {
+function readPlanInputs() {
     const sleep = parseFloat(document.getElementById('sleepTime').value) || 0;
     const work = parseFloat(document.getElementById('workTime').value) || 0;
     const subject = document.getElementById('subject').value;
     const days = parseInt(document.getElementById('targetDays').value) || 1;
+    return { sleep, work, subject, days };
+}
+
+function getTimeSlot(hours, index) {
+    const startHour = index % 2 === 0 ? 18 : 19;
+    const endHour = startHour + Math.ceil(Number(hours));
+    return `${String(startHour).padStart(2, '0')}:00 - ${String(endHour).padStart(2, '0')}:00 น.`;
+}
+
+function buildSchedule(showAlert = true) {
+    const { sleep, work, subject, days } = readPlanInputs();
 
     const freeTime = 24 - sleep - work - 2;
 
     if (freeTime <= 0) {
         alert("เวลาไม่พอ! คุณไม่มีเวลาว่างเหลือสำหรับติว");
-        return;
+        return false;
     }
 
     if (sleep + work > 24 || days < 1) {
         alert("กรุณาตรวจสอบจำนวนชั่วโมงและจำนวนวันอีกครั้ง");
-        return;
+        return false;
     }
     scheduleEvents = {};
     const today = new Date();
+    const studyHours = Math.min(3, Math.max(1, freeTime / 5)).toFixed(1);
 
     // สร้างแผนการเรียนเริ่มตั้งแต่วันนี้ ไปจนครบจำนวนวันที่ตั้งเป้าไว้
     for (let i = 0; i < days; i++) {
@@ -36,15 +48,20 @@ function generateSchedule() {
         const dateKey = getDateKey(eventDate);
         scheduleEvents[dateKey] = {
             subject: subject,
-            hours: Math.min(2, Math.max(1, freeTime / 5)).toFixed(1),
-            timeSlot: i % 2 === 0 ? "18:00 - 19:30 น." : "19:45 - 21:15 น.",
+            hours: studyHours,
+            timeSlot: getTimeSlot(studyHours, i),
             completed: false
         };
     }
 
     currentDate = new Date(today);
     renderCalendar();
-    alert(`สร้างแผน ${subject} จำนวน ${days} วันเรียบร้อย`);
+    if (showAlert) alert(`สร้างแผน ${subject} จำนวน ${days} วันเรียบร้อย`);
+    return true;
+}
+
+function generateSchedule() {
+    buildSchedule(true);
 }
 
 function getDateKey(date) { return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`; }
@@ -144,21 +161,6 @@ function updateSummary() {
     }).join('') : '<p class="empty-state">ยังไม่มีตารางที่กำลังจะถึง</p>';
 }
 
-function createStarterSchedule() {
-    const subjects = ['คณิตศาสตร์', 'ภาษาอังกฤษ', 'ฟิสิกส์', 'ทบทวนบทเรียน'];
-    const timeSlots = ['18:00 - 19:30 น.', '19:45 - 21:15 น.'];
-    for (let index = 0; index < 7; index += 1) {
-        const date = new Date();
-        date.setDate(date.getDate() + index);
-        scheduleEvents[getDateKey(date)] = {
-            subject: subjects[index % subjects.length],
-            hours: '1.5',
-            timeSlot: timeSlots[index % timeSlots.length],
-            completed: false
-        };
-    }
-}
-
 document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
 document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
 document.getElementById('todayBtn').addEventListener('click', () => { currentDate = new Date(); renderCalendar(); });
@@ -167,5 +169,5 @@ document.getElementById('closeModal').addEventListener('click', closeDetail);
 document.getElementById('checkinBtn').addEventListener('click', () => addScore(50));
 document.getElementById('detailModal').addEventListener('click', event => { if (event.target.id === 'detailModal') closeDetail(); });
 document.getElementById('todayLabel').innerText = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-createStarterSchedule();
+buildSchedule(false);
 renderCalendar();
